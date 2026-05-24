@@ -18,7 +18,7 @@ interface ProfessorDao {
     @Query("SELECT * FROM professors WHERE id = :id LIMIT 1")
     fun getProfessorById(id: Int): Flow<Professor?>
 
-    @Query("SELECT * FROM recommendations WHERE professorId = :professorId ORDER BY timestamp DESC")
+    @Query("SELECT * FROM recommendations WHERE professorId = :professorId AND isApproved = 1 ORDER BY timestamp DESC")
     fun getRecommendationsForProfessor(professorId: Int): Flow<List<Recommendation>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -35,4 +35,16 @@ interface ProfessorDao {
 
     @Query("SELECT * FROM suggestions ORDER BY timestamp DESC")
     fun getAllSuggestions(): Flow<List<TeacherSuggestion>>
+
+    @Query("SELECT * FROM recommendations WHERE id = :id LIMIT 1")
+    suspend fun getRecommendationById(id: Int): Recommendation?
+
+    @Query("SELECT * FROM recommendations WHERE isApproved = 0 ORDER BY timestamp DESC")
+    fun getPendingRecommendations(): Flow<List<Recommendation>>
+
+    @Query("DELETE FROM recommendations WHERE id = :id")
+    suspend fun deleteRecommendationById(id: Int)
+
+    @Query("DELETE FROM suggestions WHERE id = :id")
+    suspend fun deleteSuggestionById(id: Int)
 }

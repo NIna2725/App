@@ -24,8 +24,63 @@ class ProfessorRepository(private val professorDao: ProfessorDao) {
         // Insert the recommendation
         professorDao.insertRecommendation(recommendation)
 
-        // Fetch all recommendations for this professor to clean & recalculate
-        val list = professorDao.getRecommendationsListForProfessor(recommendation.professorId)
+        if (recommendation.isApproved) {
+            recalculateProfessorStats(recommendation.professorId)
+        }
+    }
+
+    val pendingRecommendations: Flow<List<Recommendation>> = professorDao.getPendingRecommendations()
+
+    suspend fun approveRecommendation(id: Int) = withContext(Dispatchers.IO) {
+        val rec = professorDao.getRecommendationById(id) ?: return@withContext
+        val updated = rec.copy(isApproved = true)
+        professorDao.insertRecommendation(updated)
+        recalculateProfessorStats(rec.professorId)
+    }
+
+    suspend fun rejectRecommendation(id: Int) = withContext(Dispatchers.IO) {
+        val rec = professorDao.getRecommendationById(id) ?: return@withContext
+        professorDao.deleteRecommendationById(id)
+    }
+
+    suspend fun approveSuggestion(suggestionId: Int) = withContext(Dispatchers.IO) {
+        val allSug = professorDao.getAllSuggestions().firstOrNull() ?: emptyList()
+        val sug = allSug.find { it.id == suggestionId } ?: return@withContext
+        
+        // 1. Create professor
+        val professor = Professor(
+            name = sug.professorName,
+            course = sug.course,
+            faculty = sug.faculty,
+            avgRating = 0.0,
+            commentsCount = 0
+        )
+        val newProfId = professorDao.insertProfessor(professor).toInt()
+        
+        // 2. If suggestion has comment, insert it as an approved Recommendation
+        if (sug.comment.isNotBlank()) {
+            val recommendation = Recommendation(
+                professorId = newProfId,
+                courseName = sug.course,
+                rating = 5,
+                comment = sug.comment,
+                tags = "Sugerido por Alumno",
+                isApproved = true
+            )
+            professorDao.insertRecommendation(recommendation)
+            recalculateProfessorStats(newProfId)
+        }
+        
+        // 3. Delete suggestion
+        professorDao.deleteSuggestionById(suggestionId)
+    }
+
+    suspend fun rejectSuggestion(suggestionId: Int) = withContext(Dispatchers.IO) {
+        professorDao.deleteSuggestionById(suggestionId)
+    }
+
+    suspend fun recalculateProfessorStats(professorId: Int) = withContext(Dispatchers.IO) {
+        val list = professorDao.getRecommendationsListForProfessor(professorId).filter { it.isApproved }
         val count = list.size
         val avgRating = if (count > 0) {
             list.map { it.rating }.average()
@@ -33,9 +88,8 @@ class ProfessorRepository(private val professorDao: ProfessorDao) {
             0.0
         }
 
-        // Get the current professor structure
         val currentProfList = professorDao.getAllProfessors().firstOrNull() ?: emptyList()
-        val currentProf = currentProfList.find { it.id == recommendation.professorId }
+        val currentProf = currentProfList.find { it.id == professorId }
         if (currentProf != null) {
             val updated = currentProf.copy(
                 avgRating = Math.round(avgRating * 10.0) / 10.0,

@@ -18,7 +18,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -1151,14 +1154,14 @@ fun ContentRecomendar(viewModel: AppViewModel) {
                     }
 
                     Text(
-                        "Publicado con éxito",
+                        "Enviado a revisión",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Text(
-                        "Tu recomendación fue enviada de forma anónima. ¡Gracias por participar!",
+                        "Tu recomendación ha sido registrada. Se publicará tan pronto como sea evaluada y activada por el administrador.",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.secondary,
                         textAlign = TextAlign.Center
@@ -1173,7 +1176,7 @@ fun ContentRecomendar(viewModel: AppViewModel) {
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Ver opiniones updated", fontWeight = FontWeight.Bold)
+                        Text("Regresar al buscador", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1324,14 +1327,14 @@ fun ContentSugerir(viewModel: AppViewModel) {
                     }
 
                     Text(
-                        "Sugerencia enviada",
+                        "Sugerencia registrada",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Text(
-                        "Tu sugerencia fue enviada de forma anónima. Evaluaremos los datos para agregar este profesor a la brevedad.",
+                        "Tu solicitud fue registrada correctamente. Se añadirá a la lista pública una vez sea verificada y activada por el administrador.",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.secondary,
                         textAlign = TextAlign.Center
@@ -1358,3 +1361,4 @@ fun ContentSugerir(viewModel: AppViewModel) {
 @Composable
 fun <T> rememberStateOf(initialValue: T): MutableState<T> = remember { mutableStateOf(initialValue) }
 fun <T> mutableStateFlowOf(initialValue: T): MutableState<T> = mutableStateOf(initialValue)
+

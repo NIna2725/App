@@ -50,6 +50,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val suggestions: StateFlow<List<TeacherSuggestion>> = repository.allSuggestions
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val pendingRecommendations: StateFlow<List<Recommendation>> = repository.pendingRecommendations
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     // UI Navigation & detail state
     private val _currentScreen = MutableStateFlow(Screen.Inicio)
     val currentScreen: StateFlow<Screen> = _currentScreen.asStateFlow()
@@ -192,12 +195,37 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 courseName = form.selectedCourse,
                 rating = form.rating,
                 comment = form.comment,
-                tags = form.selectedTags.joinToString(",")
+                tags = form.selectedTags.joinToString(","),
+                isApproved = false
             )
             repository.insertRecommendationAndUpdateProfessor(rec)
             
             // Show confirmation
             _recommendationForm.update { it.copy(showSuccess = true) }
+        }
+    }
+
+    fun approveRecommendation(id: Int) {
+        viewModelScope.launch {
+            repository.approveRecommendation(id)
+        }
+    }
+
+    fun rejectRecommendation(id: Int) {
+        viewModelScope.launch {
+            repository.rejectRecommendation(id)
+        }
+    }
+
+    fun approveSuggestion(suggestionId: Int) {
+        viewModelScope.launch {
+            repository.approveSuggestion(suggestionId)
+        }
+    }
+
+    fun rejectSuggestion(suggestionId: Int) {
+        viewModelScope.launch {
+            repository.rejectSuggestion(suggestionId)
         }
     }
 

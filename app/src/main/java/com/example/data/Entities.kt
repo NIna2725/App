@@ -21,7 +21,8 @@ data class Recommendation(
     val rating: Int,
     val comment: String,
     val tags: String, // Comma separated tags e.g., "Explica claro,Es exigente"
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val isApproved: Boolean = true
 )
 
 @Entity(tableName = "suggestions")
