@@ -1,0 +1,6 @@
+{
+  "name": "Recomienda Profe UPC",
+  "description": "Busca profesores, revisa opiniones y comparte tu experiencia de forma anónima.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
